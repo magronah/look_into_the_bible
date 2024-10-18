@@ -1,0 +1,29 @@
+project:
+  type: website
+
+website:
+  title: "Data Science and Analytics SSC Workshop"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - section: "Slides"
+        contents:
+          - slides/01-r-pkg-intro.qmd
+          - slides/02-build-first-pkg.qmd
+          - slides/03-testing-your-pkg-code.qmd
+          - slides/04-pkg-doc.qmd
+          - slides/05-ci-cd.qmd
+          - slides/06-publish-pkgs.qmd
+          - slides/07-copyright-licenses.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true

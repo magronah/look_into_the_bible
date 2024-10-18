@@ -1,0 +1,637 @@
+---
+title: "Ensuring your code works as expected"
+subtitle: "An Introduction to testing"
+format: 
+  revealjs:
+    slide-number: true
+    slide-level: 4
+    embed-resources: true
+editor: source
+bibliography: references.bib
+execute:
+  echo: true
+  eval: false
+---
+
+## Testability
+
+::: {.fragment}
+- defined as the degree to which a system 
+or component facilitates the establishment of test objectives 
+and the execution of tests to determine 
+whether those objectives have been achieved.
+::: 
+
+::: {.fragment}
+- to be successful, 
+a test needs to be able to execute the code you wish to test, 
+in a way that can trigger a defect 
+that will propagate an incorrect result to a program point
+where it can be checked against the expected behaviour. 
+:::
+## High-level properties for effective test writing and execution
+
+::: {.fragment}
+1. **controllability**: the code under test needs to be able to be programmatically controlled
+:::
+
+::: {.fragment}
+2. **observability**: the outcome of the code under test needs to be able to be verified
+:::
+
+::: {.fragment}
+3. **isolateablilty**: the code under test needs to be able to be validated on its own
+:::
+
+::: {.fragment}
+4. **automatability**: the tests should be able to be executed automatically
+:::
+
+## What kinds of tests do we write for our functions?
+
+I like to think about three broad categories of tests, 
+and then write 2-3 tests for each 
+(or more if the function is complex):
+
+::: {.fragment}
+1. Simple expected use cases
+:::
+
+::: {.fragment}
+2. Edge cases (unexpected, or rare use cases)
+:::
+
+::: {.fragment}
+3. Errors
+:::
+
+::: {.fragment}
+*We will come back to these and provide specific examples in a few minutes.*
+:::
+
+## When do we write tests? 
+
+::: {.fragment}
+- Anytime you think about writing a function!
+:::
+
+::: {.fragment}
+- You can even write your tests before you write your function, 
+you just have to have planned what function inputs and outputs to expect.
+:::
+
+::: {.fragment}
+- Writing your tests before implementing your function 
+can even improve your productivity [@erdogmus2005effectiveness]! 
+:::
+
+::: {.fragment}
+*In software engineering, writting your tests before your functions is called "Test Driven Development" [@becker2002test].*
+:::
+
+## Workflow for writing functions and tests
+
+::: {style="font-size:30px"}
+
+::: {.fragment}
+1. Write the function specifications and documentation - 
+but do not implement the function.
+:::
+
+::: {.fragment}
+2. Plan the test cases and document them.
+:::
+
+::: {.fragment}
+3. Create test data that is useful for assessing whether your function works as expected.
+:::
+
+::: {.fragment}
+4. Write the tests to evaluate your function based on the planned test cases and test data.
+:::
+
+::: {.fragment}
+5. Implement the function by writing the needed code in the function body to pass the tests.
+:::
+
+::: {.fragment}
+6. Iterate between steps 2-5 to improve the test coverage and function.
+:::
+
+:::
+
+## Example of workflow for writing functions and tests for data science
+
+Let's pretend we haven't yet written our `count_classes` function, 
+and follow the workflow I just outlined to develop our function 
+and it's test suite.
+
+### 1. Write the function specifications and documentation - but do not implement the function
+
+---
+
+::: {style="font-size:34px"}
+
+```{r}
+#' Count class observations                                                    
+#'                                                                             
+#' Creates a new data frame with two columns, 
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col unquoted column name of column containing class labels
+#'
+#' @return A data frame with two columns. 
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations 
+#'   for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#'
+#' @export
+#' @examples
+#' count_classes(mtcars, am)
+count_classes <- function(data_frame, class_col) {                           
+  # returns a data frame with two columns: class and count
+}
+```
+
+:::
+
+### 2. Plan the test cases and document them
+
+- write or draw out tests cases 
+- sketch out a code skeleton for our test cases, but do not implement them 
+(we first will need to reproducibly create test data)  
+
+### Simple expected use test case #1
+
+- Dataframe with 2 classes, with 2 observations per class
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Function input:
+
+::: {style="font-size:32px"}
+1. dataframe
+:::
+```{r}
+  class_labels values
+1       class1    0.2
+2       class2    0.5
+3       class1    0.8
+4       class2    0.5
+```
+
+::: {style="font-size:32px"}
+2. unquoted column name
+:::
+```{r}
+class_labels
+```
+:::
+
+::: {.column width="10%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="40%"}
+Expected function output:
+
+::: {style="font-size:32px"}
+Dataframe (or tibble)
+:::
+```{r}
+   class count
+1 class1     2
+2 class2     2
+```
+
+:::
+
+::::
+
+### Simple expected use test case #2
+
+- Dataframe with 2 classes, with 2 observations for one class, 
+and only one observation in the other
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Function input:
+
+::: {style="font-size:32px"}
+1. dataframe
+:::
+```{r}
+  class_labels values
+1       class1    1.0
+2       class1    0.9
+3       class2    0.9
+```
+
+::: {style="font-size:32px"}
+2. unquoted column name
+:::
+```{r}
+class_labels
+```
+:::
+
+::: {.column width="10%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="40%"}
+Expected function output:
+
+::: {style="font-size:32px"}
+Dataframe (or tibble)
+:::
+```{r}
+   class count
+1 class1     2
+2 class2     1
+```
+
+:::
+
+::::
+
+### Edge test case #1
+
+- Dataframe with 1 classes, with 2 observations for that class
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Function input:
+
+::: {style="font-size:32px"}
+1. dataframe
+:::
+```{r}
+  class_labels values
+1       class1    0.7
+2       class1    0.5
+```
+
+::: {style="font-size:32px"}
+2. unquoted column name
+:::
+```{r}
+class_labels
+```
+:::
+
+::: {.column width="10%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="40%"}
+Expected function output:
+
+::: {style="font-size:32px"}
+Dataframe (or tibble)
+:::
+```{r}
+   class count
+1 class1     2
+```
+
+:::
+
+::::
+
+### Edge test case #2
+
+- Dataframe with no class observations
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Function input:
+
+::: {style="font-size:32px"}
+1. dataframe
+:::
+```{r}
+  class_labels values
+```
+
+::: {style="font-size:32px"}
+2. unquoted column name
+:::
+```{r}
+class_labels
+```
+:::
+
+::: {.column width="10%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="40%"}
+Expected function output:
+
+::: {style="font-size:32px"}
+Dataframe (or tibble)
+:::
+```{r}
+   class count
+```
+
+:::
+
+::::
+
+
+### Error test case #1
+
+- A list with 2 classes, with 2 observations for each class
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Function input:
+
+::: {style="font-size:32px"}
+1. list
+:::
+```{r}
+$class_labels
+[1] "class1" "class2" "class1" "class2"
+
+$values
+[1] 0.4 0.7 0.0 0.6
+```
+
+::: {style="font-size:32px"}
+2. unquoted list element name
+:::
+```{r}
+class_labels
+```
+:::
+
+::: {.column width="10%"}
+<!-- empty column to create gap -->
+:::
+
+::: {.column width="40%"}
+Expected function output:
+
+::: {style="font-size:32px"}
+Error
+:::
+```{r}
+Error : 
+  `data_frame` should be a dataframe or dataframe extension (e.g. a tibble)
+```
+
+:::
+
+::::
+
+### Code skeleton for the unit tests
+
+With the [`testthat`](https://testthat.r-lib.org/index.html) 
+R package we create a `test_that` statement 
+for each related group of tests for a function:
+
+```{r}
+test_that("`count_classes` should return a data frame, or tibble, 
+with the number of rows corresponding to the number of unique classes 
+in the `class_col` from the original dataframe. The new dataframe 
+will have a `class column` whose values are the unique classes, 
+and a `count` column, whose values will be the number of observations 
+for each  class", {
+  # "expected use cases" tests to be added here
+})
+
+test_that("`count_classes` should return an empty data frame, or tibble, 
+if the input to the function is an empty data frame", {
+  # "edge cases" test to be added here
+})
+
+test_that("`count_classes` should throw an error when incorrect types 
+are passed to the `data_frame` argument", {
+  # "error" tests to be added here
+})
+```
+
+### 3. Create test data that is useful for assessing whether your function works as expected
+
+- Write code to create reproducible test data for your planned test cases
+
+- This should be done for both function inputs, and expected outputs
+
+- Keep the test data as small and tractable as possible
+
+### Function inputs for test cases
+
+```{r}
+set.seed(2024)
+
+two_classes_2_obs <- data.frame(class_labels = rep(c("class1",
+                                                       "class2"), 2),
+                                  values = round(runif(4), 1))
+two_classes_2_and_1_obs <- data.frame(class_labels = c(rep("class1", 2),
+                                                       "class2"),
+                                      values = round(runif(3), 1))
+one_class_2_obs <- data.frame(class_labels = c("class1", "class1"),
+                              values = round(runif(2), 1))
+empty_df  <- data.frame(class_labels = character(0),
+                        values = double(0))
+two_classes_two_obs_as_list <- list(class_labels = rep(c("class1",
+                                                         "class2"), 2),
+                                    values = round(runif(4), 1))
+```
+
+### Expected function outputs for test cases
+
+```{r}
+two_classes_2_obs_output <- data.frame(class = c("class1", "class2"),
+                                         count = c(2,2))
+two_classes_2_and_1_obs_output <- data.frame(class = c("class1", "class2"),
+                                             count = c(2, 1))
+one_class_2_obs_output <- data.frame(class = "class1",
+                                     count = 2)
+empty_df_output <- data.frame(class = character(0),
+                              count = numeric(0))
+```
+
+### 4. Write the tests to evaluate your function based on the planned test cases and test data
+
+`testthat` package test syntax:
+
+```{r}
+test_that("Message to print if test fails", expect_*(...))
+```
+
+### Common expect_* statements for use with `test_that`:
+
+Is the object equal to a value?
+
+- `expect_identical` - test two objects for being exactly equal
+- `expect_equal` - compare R objects x and y testing ‘near equality’ (can set a tolerance)
+- `expect_equal(ignore_attr = TRUE)` - compare R objects x and y testing ‘near equality’ (can set a tolerance) and does not assess attributes
+
+### Common expect_* statements for use with `test_that`:
+
+Does code produce an output/message/warning/error?
+
+- `expect_error` - tests if an expression throws an error
+- `expect_warning` - tests whether an expression outputs a warning
+- `expect_output` - tests that print output matches a specified value
+
+### Common expect_* statements for use with `test_that`:
+
+Is the object true/false?
+
+- `expect_true` - tests if the object returns TRUE
+- `expect_false` - tests if the object returns FALSE
+
+### 4. Write the tests to evaluate your function based on the planned test cases and test data (cont'd)
+
+### Expected use test cases
+
+```{r}
+test_that("`count_classes` should return a data frame, or tibble, 
+with the number of rows corresponding to the number of unique classes 
+in the `class_col` from the original dataframe. The new dataframe 
+will have a `class column` whose values are the unique classes, 
+and a `count` column, whose values will be the number of observations 
+for each  class", {
+  expect_s3_class(count_classes(two_classes_2_obs, class_labels),
+                  "data.frame")
+  expect_equal(count_classes(two_classes_2_obs, class_labels),
+                    two_classes_2_obs_output, ignore_attr = TRUE)
+  expect_equal(count_classes(two_classes_2_and_1_obs, class_labels),
+                    two_classes_2_and_1_obs_output, ignore_attr = TRUE)
+})
+```
+
+### Edge test cases
+
+```{r}
+test_that("`count_classes` should return an empty data frame, or tibble, 
+if the input to the function is an empty data frame", {
+  expect_equal(count_classes(one_class_2_obs, class_labels),
+                    one_class_2_obs_output, ignore_attr = TRUE)
+  expect_equal(count_classes(empty_df, class_labels),
+                    empty_df_output, ignore_attr = TRUE)
+})
+```
+
+### Error test case
+
+```{r}
+test_that("`count_classes` should throw an error when incorrect types 
+are passed to the `data_frame` argument", {
+  expect_error(count_classes(two_classes_two_obs_as_list, class_lables))
+})
+```
+
+### Wait what??? Most of our tests fail…
+
+Yes, we expect that, we haven’t written our function body yet!
+
+### 5. Implement the function by writing the needed code in the function body to pass the tests
+
+FINALLY!! We can write the function body for our function! And then call our tests to see if they pass!
+
+---
+::: {style="font-size:26px"}
+```{r}
+#' Count class observations
+#'
+#' Creates a new data frame with two columns, 
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col unquoted column name of column containing class labels
+#'
+#' @return A data frame with two columns. 
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#'
+#' @export
+#'
+#' @examples
+#' count_classes(mtcars, am)
+count_classes <- function(data_frame, class_col) {
+    if (!is.data.frame(data_frame)) {
+        stop("`data_frame` should be a data frame or data frame extension (e.g. a tibble)")
+    }
+    data_frame |>
+        dplyr::group_by({{ class_col }}) |>
+        dplyr::summarize(count = dplyr::n()) |>
+        dplyr::rename("class" = {{ class_col }})
+}
+```
+:::
+### 6. Iterate between steps 2-5 to improve the test coverage and function
+
+- Are we done? For the purposes of this demo, yes! 
+
+- However in practice you would usually cycle through steps 2-5, 
+two-three more times to further improve our tests and and function.
+
+## Where do the function and test files go?
+
+::: {style="font-size:32px"}
+
+- The test code goes in a folder called `tests`
+
+- To setup the correct file and directory structure for our tests, we run:
+
+```{r}
+usethis::use_testthat()
+```
+
+Which will:
+
+- Create a `tests/testthat/` directory, where we will put our test files
+- Add `testthat` to the `Suggests` field in the `DESCRIPTION` file.
+- Create a file `tests/testthat.R` that runs all your tests when `R CMD` check runs 
+
+:::
+
+## Where do the function and test files go?
+
+::: {style="font-size:32px"}
+
+- As you define functions in your package, in the files below `R/`, you add the corresponding tests to `.R` files in `tests/testthat/`
+
+-  We strongly recommend that the organisation of test files match the organisation of `R/` files, for example, for the EDA pacakge:
+
+:::
+
+```
+R                                           tests/testthat
+└── count_classes.R                         └── test-count_classes.R
+    count_classes <- function(...) {...}          test_that("count_classes does this", {...})
+                                                  test_that("count_classes does that", {...})
+```
+
+## How do we run the test suite?
+
+```{r}
+
+devtools::test()
+```
+
+## Attributions:
+
+- [*R Packages (2e)*](https://r-pkgs.org/) by Hadley Wickham and Jennifer Bryan
+
+- [CPSC 310](https://github.com/ubccpsc/310/blob/master/resources/readings/TestabilityAssertions.md) class notes from Reid Holmes, UBC
+
+- [CPSC 410](https://www.cs.ubc.ca/~rtholmes/teaching/2015t1/cpsc410/slides/410_19_testability.pdf) class notes from Reid Holmes, UBC
+
+## References

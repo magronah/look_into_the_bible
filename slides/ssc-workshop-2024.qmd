@@ -1,0 +1,1324 @@
+---
+title: "How to create and distribute `R` packages"
+format: 
+  revealjs:
+    slide-number: true
+    slide-level: 4
+    embed-resources: true
+---
+
+# Welcome!
+
+Let's introduce ourselves...
+
+::: {.fragment .fade-left}
+::: {#fig-team layout-ncol="4"}
+![Katie Burak](img/photo_katie.jpg){width=200}
+
+![Daniel Chen](img/photo_daniel.jpg){width=200}
+
+![G. Alexi Rodríguez-Arelis](img/photo_alexi.jpg){width=200}
+
+![Tiffany Timbers](img/timbers_2021.jpg){width=200}
+
+Teaching team
+:::
+:::
+
+# What is an `R` package and when should I make one?
+
+![](img/panda.png){fig-align="center" width=10%}
+
+## This question is key!
+
+::: incremental
+- An `R` package is central to generating <span style="color: purple;">reproducible code</span>
+- It allows us to call functions whenever we need them in our data wrangling and/or analysis
+- Its functions are expected to be reproducible code and <span style="color: purple;">adequately documented</span> (even with some <span style="color: purple;">sample data</span>!)
+:::
+
+## Let's start with our toy example
+
+::: incremental
+- Suppose that, <span style="color: purple;">in your everyday analysis</span>, you are usually coding the distribution of observations over the classes (i.e., categories) of a given variable in your dataset
+- Moreover, you would like to <span style="color: purple;">automate</span> this process and <span style="color: purple;">share</span> your work!
+:::
+
+## This is an specific example of your everyday process
+
+- The code below is counting how many cars in `mtcars` (composed of 32 observations) have `4`, `6`, and `8` cylinders
+
+. . .
+
+```{r}
+#| echo: true
+#| code-line-numbers: "|3|4|5|6"
+library(tidyverse, quietly = TRUE)
+
+mtcars |>
+  group_by(cyl) |>
+  summarize(count = n()) |>
+  rename("class" = cyl)
+```
+
+## Is an `R` package the answer to our previous <span style="color: purple;">automation</span> and <span style="color: purple;">sharing</span> inquiries?
+
+## Yes, it is!
+
+::: incremental
+- A published package is crucial in everyday shareable code
+- It encompasses code, data, documentation, and <span style="color: purple;">test functions</span>
+:::
+
+![](img/software.png){fig-align="center" width=5%}
+
+## How are `R` packages shared and downloaded?
+
+- We have the [**Comprehensive R Archive Network (CRAN)**](https://cran.r-project.org)
+
+. . .
+
+> *CRAN is a network of ftp and web servers around the world that store identical, up-to-date, versions of code and documentation for `R`.*
+
+. . .
+
+- As of today, there are over <span style="color: purple;">20,000 packages available</span> on the CRAN
+
+## What will be our learning goals?
+
+::: incremental
+- Develop `R` packages from scratch via a <span style="color: purple;">toy example</span>
+- Introduce the concept of <span style="color: purple;">testing</span> to ensure our package coding works as expected
+- Include the corresponding <span style="color: purple;">documentation</span>
+- Introduce <span style="color: purple;">continuous integration</span> using <span style="color: purple;">GitHub Actions</span>
+- Share and publish packages on <span style="color: purple;">GitHub</span> and <span style="color: purple;">CRAN</span> 
+- Define <span style="color: purple;">copyright rules</span> when building, sharing, and using packages
+- Choose the most appropriate <span style="color: purple;">license</span>
+:::
+
+# Hands-on building an `R` package
+
+## Before proceeding...
+
+<br>
+
+> **Attribution:** This content has been developed on the basis provided by [**Chapter 1: The Whole Game**](https://r-pkgs.org/release.html) (`R` packages book by Hadley Wickham & Jenny Bryan, 2e) and the UBC course notes [**Reproducible and Trustworthy Workflows for Data Science**](https://ubc-dsci.github.io/reproducible-and-trustworthy-workflows-for-data-science/materials/lectures/10-packaging-and-documenting.html#when-to-start-writing-an-r-or-python-package) by Tiffany Timbers, Joel Östblom, Florencia D’Andrea, and Rodolfo Lourenzutti
+
+> We need to <span style="color: purple;">register a GitHub account</span>  and <span style="color: purple;">install git</span> ([**more information here**](https://github.com/UBC-STAT/ssc-workshop-2024#ssc-workshop-2024))
+
+
+## Toy package: <span style="color: darkblue;">{eda}</span>
+
+::: incremental
+- Our toy package's name will be <span style="color: darkblue;">{eda}</span>
+- Suppose the package's purpose is to provide data wrangling and summary functions to conduct a proper <span style="color: purple;">exploratory data analysis</span> (hence the name <span style="color: purple;">EDA</span>)
+- We will be switching back and forth between these slides and hands-on practice in <span style="color: purple;">**RStudio**</span>
+:::
+
+![](img/r-rstudio.png){fig-align="center" width=10%}
+
+## Installing auxiliary `R` packages
+
+::: incremental
+- Before starting with the actual process, we need to <span style="color: purple;">install</span> and <span style="color: purple;">load</span> the packages <span style="color: darkblue;">{devtools}</span> and <span style="color: darkblue;">{usethis}</span>
+- <span style="color: darkblue;">{devtools}</span> is a meta-package that encompasses more focused development-related `R` packages
+- <span style="color: darkblue;">{usethis}</span> automates tasks related to <span style="color: purple;">project setup</span> and <span style="color: purple;">development</span> to build `R` packages
+:::
+
+![](img/usethis-devtools.png){fig-align="center" width=10%}
+
+### Installation and loading code
+
+- Installing <span style="color: darkblue;">{devtools}</span> automatically installs <span style="color: darkblue;">{usethis}</span>
+- Same situation applies when it come to loading the packages
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|1|3"
+install.packages("devtools")
+
+library(devtools)
+```
+
+## Function `create_package()`
+
+::: incremental
+- Function `create_package()` will <span style="color: purple;">initialize</span> our new package in a directory of our choice 
+- I will initialize the <span style="color: darkblue;">{eda}</span> package in my `Desktop` folder for easier reference
+:::
+
+. . .
+
+::: callout-warning
+## Don'ts when choosing your home directory
+
+-   Your package shouldn't be hosted in another RStudio Project, `R` package, or GitHub repo
+-   Your package shouldn't be hosted in an `R` package library (i.e., where we usually instal other packages from CRAN)
+:::
+
+### Code
+
+```{r}
+#| echo: true
+#| eval: false
+create_package("~/Desktop/eda")
+```
+
+<br>
+
+![](img/create_package.png){fig-align="center" width=8%}
+
+### Project layout description (`ignore`-type files)
+
+::: incremental
+- `.gitignore` is used by GitHub and lists all <span style="color: purple;">"hidden"</span> files created by `R` and RStudio that aren't necessary for the repo
+-  `.Rbuildignore` contains all files created via `R` and RStudio <span style="color: purple;">that won't be necessary</span> when building our package (e.g., `eda.Rproj`)
+:::
+
+### Project layout description (other components)
+
+::: incremental
+- `DESCRIPTION` contains the metadata and dependency installation instructions for our package
+- `eda.Rproj` is the <span style="color: purple;">RStudio project file</span>
+- `NAMESPACE` contains the package's functions to export along with imports from other packages
+- An `R/` directory which will contain <span style="color: purple;">all package's functions</span> as `.R` scripts
+:::
+
+## Function `use_git()`
+
+::: incremental
+- Besides creating the <span style="color: purple;">RStudio project file</span> `eda.Rproj`, we will initialize a Git repository via `use_git()`
+- A Git repository will eventually allow us to publish and share our package in [**GitHub.com**](https://github.com)
+:::
+
+. . .
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(devtools)
+
+use_git()
+```
+
+### What does this function specifically do?
+
+- It creates hidden <span style="color: purple;">`.git` directory</span> in the folder <span style="color: darkblue;">{eda}</span>
+- Furthermore, it creates your <span style="color: purple;">initial commit</span>
+
+![](img/use_git.png){fig-align="center" width=8%}
+
+### Ensuring we made our initial commit
+
+- Let's relaunch our RStudio project `eda.Rproj`
+- On the <span style="color: purple;">`Git` tab</span>, click on the clock icon to check your <span style="color: purple;">commit history</span> (note your GitHub user is shown in the `Author` column)
+
+![](img/git-history.png){fig-align="center" width=8%}
+
+## Write your first function!
+
+. . .
+
+- Recall we aim to automate the below data wrangling process for any data frame (besides `mtcars`)
+
+```{r}
+#| echo: true
+mtcars |>
+  group_by(cyl) |>
+  summarize(count = n()) |>
+  rename("class" = cyl)
+```
+
+. . .
+
+- Therefore, we need to create an `R` function
+
+### This is our function `count_classes()`
+
+. . .
+
+- It receives a `data_frame` or data frame extension (e.g., a tibble) along with an <span style="color: purple;">unquoted column name</span> containing the class label `class_col`
+- If we want to use unquoted column names in a function with <span style="color: darkblue;">{dplyr}</span> functions, then we surround them with `{{ }}`
+
+```{r}
+#| echo: true
+#| eval: false
+
+count_classes <- function(data_frame, class_col) {
+  if (!is.data.frame(data_frame)) {
+    stop("`data_frame` should be a data frame or data frame extension (e.g. a tibble)")
+  }
+
+  data_frame |>
+    dplyr::group_by({{ class_col }}) |>
+    dplyr::summarize(count = dplyr::n()) |>
+    dplyr::rename("class" = {{ class_col }})
+}
+```
+
+###  Function `use_r()`
+
+<br>
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(devtools)
+
+use_r("count_classes")
+```
+
+<br>
+
+. . .
+
+- This helper function from <span style="color: darkblue;">{usethis}</span> allows us to create an `.R` script in the `R/` subdirectory of <span style="color: darkblue;">{eda}</span>
+
+![](img/console-use_r.png){fig-align="center"}
+
+### How does it look on R Studio?
+
+. . .
+
+- `use_r()` creates the `.R` script `count_classes.R`
+- The `Git` tab keeps track of all our changes in the repo <span style="color: purple;">after our initial commit</span>
+
+![](img/count_classes.png){fig-align="center"}
+
+### Local commit of changes
+
+. . .
+
+- Now, we need to commit our work in `count_classes.R`
+- We can do this via RStudio:
+  1. In the `Git` tab, check the box in column `Staged`
+  2. Click on the `Commit` button
+
+![](img/commit-count_classes.png){fig-align="center" width=70%}
+
+### Then...
+
+. . .
+
+1. Ensure the changes are checked in the `Stage` column
+2. Type a commit message: `Add count_classes()`
+3. Click on the `Commit` button
+
+![](img/commit-count_classes-2.png){fig-align="center" width=60%}
+
+### Commit confirmation
+
+- We will get the below message once we have locally committed our changes
+
+![](img/commit-count_classes-3.png){fig-align="center" width=60%}
+
+. . .
+
+- This local committing process will be <span style="color: purple;">repeated every time</span> we make significant changes to our package
+
+## Function `load_all()`
+
+- The next step in our package building process is <span style="color: purple;">to test **informally**</span> our function `count_classes()`
+- Function `load_all()` from <span style="color: darkblue;">{devtools}</span> makes function `count_classes()` available for experimentation
+
+```{r}
+#| echo: true
+#| eval: false
+
+load_all()
+```
+
+<br>
+
+![](img/load_all-function.png){fig-align="center"}
+
+### Then, we test our function
+
+- We use data frame `mtcars` and column `cyl`
+- The above variables correspond to function arguments `data_frame` and `class_col`, respectively
+
+```{r}
+#| echo: true
+#| eval: false
+
+count_classes(data_frame = mtcars, class_col = cyl)
+```
+
+![](img/using-count-classes.png){fig-align="center"}
+
+## Setting up our remote GitHub repo
+
+- Via our <span style="color: purple;">GitHub account</span>, we will create a remote <span style="color: darkblue;">{eda}</span> **public** repo (**we will add the `README.md` file later**)
+
+![](img/create-new-repo-GH.png){fig-align="center" width=60%}
+
+### Pushing our local commits to the remote repo
+
+. . .
+
+- <span style="color: purple;">In the `Terminal` tab of our RStudio session</span>, we will paste the Git commands shown by <span style="color: purple;">GitHub.com</span> from section `...or push an existing repository from the command line`
+
+![](img/push-existing-repo.png){fig-align="center" width=55%}
+
+### This is how our remote repo should look like:
+
+<br>
+
+![](img/initial-eda-repo.png){fig-align="center" width=60%}
+
+### And these are our two initial commits in the remote repo:
+
+<br>
+
+![](img/initial-commits-eda-repo.png){fig-align="center" width=60%}
+
+## Function `check()`
+
+- To ensure that our package is in full working order, we'd need to execute `R CMD check` in the shell (i.e., terminal)
+- We use function `check()` from <span style="color: darkblue;">{devtools}</span> via the `R` `Console`
+
+```{r}
+#| echo: true
+#| eval: false
+
+check()
+```
+
+![](img/using-check.png){fig-align="center"}
+
+### Heads-up!
+
+::: incremental
+- The output of this function is quite long!
+- That said, we essentially need to check the <span style="color: purple;">final summary</span> (i.e., the previous screenshot)
+- It's crucial to address any issue we might encounter (which will be shown in the `check()` output)
+- For our toy package <span style="color: darkblue;">{eda}</span>, we will only encounter two warnings (**to be addressed later on**) 
+:::
+
+## Edit `DESCRIPTION`
+
+. . .
+
+- It's time to edit our package's <span style="color: purple;">metadata</span> in the `DESCRIPTION` file
+- It currently looks like this:
+
+```
+Package: eda
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+```
+
+
+### Let's proceed with the edits!
+
+- We will update the fields `Title`, `Authors@R`, and `Description`
+- If you don't have an `ORCID`, you can delete `comment = c(ORCID = "YOUR-ORCID-ID")`
+
+```
+Package: eda
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person("G. Alexi", "Rodriguez-Arelis", , "alexrod@stat.ubc.ca", role = c("aut", "cre"))
+Description: Provide data wrangling and summary functions to conduct a proper 
+    exploratory data analysis.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+```
+
+### Saving, committing, and pushing
+
+- Once we have edited the `DESCRIPTION` file, we need to save our changes
+- Then, as we did with the `count_classes()` function, <span style="color: purple;">let's locally commit these changes</span> (use the commit message `Edit DESCRIPTION`)
+- Moving forward, within the `Git` tab in RStudio, we will remotely push our edits to our public repo on GitHub by clicking on the `Push` button
+
+![](img/push-button.png){fig-align="center"}
+
+### Ensuring we have remotely pushed our edits
+
+- Firstly, within RStudio, you will get the below confirmation
+
+![](img/push-confirmation.png){fig-align="center" width=50%}
+
+- Then, we will be able to see our third commit in our remote repo
+
+![](img/third-commit-eda-repo.png){fig-align="center" width=70%}
+
+## Function `use_mit_license()`
+
+- To address one of the warnings obtained in the output of `check()`, we need to include a `LICENSE.md`
+- Hence, we can use function `use_mit_license()` from <span style="color: darkblue;">{usethis}</span> via the `R` `Console`
+
+```{r}
+#| echo: true
+#| eval: false
+
+use_mit_license()
+```
+
+![](img/using-use_mit_license.png){fig-align="center"}
+
+### How does `LICENSE.md` look like?
+
+![](img/license-md.png){fig-align="center" width=80%}
+
+> **Note:** More about license matters later on in this workshop
+
+### Let's take a look at the `DESCRIPTION` file!
+
+- The `License` field gets updated as follows:
+
+```
+Package: eda
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person("G. Alexi", "Rodriguez-Arelis", , "alexrod@stat.ubc.ca", role = c("aut", "cre"))
+Description: Provide data wrangling and summary functions to conduct a proper 
+    exploratory data analysis.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+```
+
+. . .
+
+- <span style="color: purple;">Let's commit and push these changes to the remote repo</span> (use the commit message `Use MIT license`)
+
+## Function `document()`
+
+- Let's document our `count_classes()` function via package <span style="color: darkblue;">{roxygen2}</span>
+
+![](img/roxygen2.png){fig-align="center"}
+
+- In RStudio, let's open `R/count_classes.R` in the source editor
+
+### Using {roxygen2}
+
+- Do `Code > Insert roxygen skeleton`
+- We will get a <span style="color: purple;">documentation template</span> we have to fill out
+
+![](img/roxygen-skeleton.png){fig-align="center" width=80%}
+
+### Filling out the template
+
+- Let's copy and paste the below documentation on the previous template for `count_classes()`
+
+```
+#' Count class observations
+#' Creates a new data frame with two columns, 
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col Unquoted column name of column containing class labels.
+#'
+#' @return A data frame with two columns. 
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#' @export
+#'
+#' @examples
+#' count_classes(mtcars, cyl)
+```
+. . .
+
+### Then...
+
+- Save your changes in `R/count_classes.R`
+- Commit and push these changes to the remote repo</span> (use the commit message `Add roxygen header to document count_classes()`)
+
+### Using `document()` from <span style="color: darkblue;">{devtools}</span>
+
+- Let's run the `document()` function in the `R` `Console`
+
+```{r}
+#| echo: true
+#| eval: false
+
+document()
+```
+
+<br>
+
+- This function creates `man/count_classes.Rd` in <span style="color: darkblue;">{eda}</span>, which is the help we get when typing `?count_classes` in the `R` `Console`
+
+### Viewing the outputs from `document()`
+
+![](img/doc-count_classes.png){fig-align="center" width=80%}
+
+. . .
+
+- Commit and push these changes to the remote repo</span> (use the commit message `Run document()`)
+
+## Using `check()` again
+
+- Since we already included `LICENSE.md` in <span style="color: darkblue;">{eda}</span>, let's use `check()` again in the `R` `Console` to ensure the license-related warning is gone
+
+![](img/using-check-2.png){fig-align="center"}
+
+## Function `install()`
+
+- It's time to install our package <span style="color: darkblue;">{eda}</span>
+- That said, instead of using `install.packages()` as with any package in the CRAN, we will use `install()` from <span style="color: darkblue;">{devtools}</span>
+
+```{r}
+#| echo: true
+#| eval: false
+
+install()
+library(eda)
+count_classes(mtcars, cyl)
+```
+
+### Let's do it in the `R` console
+
+![](img/using-install.png){fig-align="center"}
+
+## Function `use_testthat()`
+
+::: incremental
+- We can implement <span style="color: purple;">formal unit tests</span>: *a concrete output expectation from our package functions for a given input*
+- To build the <span style="color: darkblue;">{eda}</span> testing infrastructure, we use function `use_testthat()` from <span style="color: darkblue;">{usethis}</span>:
+  1. Suggests package <span style="color: darkblue;">{testhat}</span> in `DESCRIPTION`
+  2. Creates directory `tests/testthat/` in <span style="color: darkblue;">{eda}</span>
+  3. Adds the script `tests/testthat.R`
+:::
+
+. . .
+
+```{r}
+#| echo: true
+#| eval: false
+
+use_testthat()
+```
+
+### Let's do it in the `R` console
+
+![](img/using-use_testthat.png){fig-align="center"}
+
+- Commit and push these changes to the remote repo</span> (use the commit message `Add testing infrastructure`)
+
+## Function `use_test()`
+
+- This helper function from <span style="color: darkblue;">{usethis}</span> creates a test file in `tests/testthat/` per function
+
+```{r}
+#| echo: true
+#| eval: false
+
+use_test("count_classes")
+```
+
+<br>
+
+- In `test-count-classes.R`, you will see an example test which should be changed to an applicable one for `count_classes()` (**more on testing later on in this workshop**)
+
+### Let's do it in the `R` console
+
+![](img/use-use_test.png){fig-align="center"}
+
+- Commit and push these changes to the remote repo</span> (use the commit message `Test count_classes()`)
+
+## Function `test()`
+
+- Suppose you have already built suitable test functions for your package
+- The next step is running `test()` from <span style="color: darkblue;">{devtools}</span>
+
+```{r}
+#| echo: true
+#| eval: false
+
+test()
+```
+
+### Let's do it in the `R` console
+
+- <span style="color: purple;">`test()` runs all our test functions</span> and provides the corresponding testing results
+
+![](img/use-test.png){fig-align="center"}
+
+## Function `use_package()`
+
+- Note that `count_classes()` uses functions from package <span style="color: darkblue;">{dplyr}</span>
+
+![](img/count_classes-2.png){fig-align="center"}
+
+- Therefore, <span style="color: darkblue;">{dplyr}</span> becomes a dependency
+
+### How to include a dependency in our package?
+
+- We can use function `use_package()` from <span style="color: darkblue;">{usethis}</span>
+
+```{r}
+#| echo: true
+#| eval: false
+
+use_package("dplyr")
+```
+
+<br>
+
+- This function will include <span style="color: darkblue;">{dplyr}</span> in our `DESCRIPTION`, more specifically in `Imports`
+
+### Let's do it in the `R` console
+
+![](img/use-use_package.png){fig-align="center"}
+
+- Commit and push these changes to the remote repo</span> (use the commit message `Import dplyr`)
+
+## Function `use_readme_rmd()`
+
+- Our remote repo still doesn't have a `README.md` file <span style="color: purple;">describing the package, installation, and usage</span>
+- We can automatically generate one via `use_readme_rmd()` from <span style="color: darkblue;">{usethis}</span>
+
+```{r}
+#| echo: true
+#| eval: false
+
+use_readme_rmd()
+```
+
+<br>
+
+. . .
+
+- This function will generate an `.Rmd` template, which we have to fill out
+
+### The `.Rmd` file
+
+![](img/use-use_readme_rmd.png){fig-align="center"}
+
+- Fill out the template, knit to `.md`, use `build_readme()`,commit, and push these changes to the remote repo</span> (use the commit message `Write README.Rmd and render`)
+
+## Using `check()` and `install()`
+
+- We're done with the basic steps to build our `R` package
+- Again, we use `check()` (to ensure all warnings are gone!), and then re-build via `install()`
+
+## Review
+
+- We can review the previous process via the below diagram from [**Chapter 1: The Whole Game**](https://r-pkgs.org/release.html) (`R` packages book by Hadley Wickham & Jenny Bryan, 2e)
+
+![](https://r-pkgs.org/diagrams/workflow.png){fig-align="center"}
+
+
+# Ensuring your code works as expected: an introduction to testing
+
+- Software tests allow you to demonstrate to yourself and others, 
+that your code works as expected. 
+
+- We all test our code informally, 
+what we will talk about here is how to do this more formally 
+so that our testing is reproducible 
+and so we can automate the execution of our tests. 
+
+## Formal software tests
+
+To make this more concrete, 
+here is an example of a formal software test for the `count_classes` function 
+from our package:
+
+```{r}
+#| eval: false
+
+library(eda)
+library(testthat)
+
+# simulate some simple test data
+two_classes <- data.frame(class_lables = c("class1", "class1", "class2"),
+                          values = c(1, 3, 2))
+
+# test that `count_classes` returns a tibble
+test_that("`count_classes` should return a tibble", {
+  expect_s3_class(count_classes(two_classes, class_lables), "tibble")
+})
+```
+
+What does this code do? It:
+
+1. loads the package and testing library
+2. simulates some simple and tractable test data
+3. calls the `count_classes` function, providing the simple as input 
+4. reports that the `count_classes` function returns a tibble object as expected 
+(and if it doesn't work as expected, 
+it prints out a useful message as to what went wrong)
+
+## Testability
+
+Testability is defined as the degree to which a system 
+or component facilitates the establishment of test objectives 
+and the execution of tests to determine 
+whether those objectives have been achieved.
+
+In order to be successful, 
+a test needs to be able to execute the code you wish to test, 
+in a way that can trigger a defect 
+that will propagate an incorrect result to a program point
+where it can be checked against the expected behaviour. 
+From this we can derive four high-level properties 
+required for effective test writing and execution. 
+These are:
+
+- controllability 
+- observability
+- isolateablilty
+- automatability
+
+## High-level properties for effective test writing and execution
+
+**controllability**: the code under test needs to be able to be programmatically controlled
+
+**observability**: the outcome of the code under test needs to be able to be verified
+
+**isolateablilty**: the code under test needs to be able to be validated on its own
+
+**automatability**: the tests should be able to be executed automatically
+
+Source: [CPSC 310](https://github.com/ubccpsc/310/blob/master/resources/readings/TestabilityAssertions.md) 
+& [CPSC 410](https://www.cs.ubc.ca/~rtholmes/teaching/2015t1/cpsc410/slides/410_19_testability.pdf) class notes from Reid Holmes, UBC]
+
+## What kinds of tests do we write for our functions?
+
+When I am designing tests for my function, 
+I like to think about three broad categories of tests, 
+and then write 2-3 tests for each 
+(or more if the function is complex and takes many arguments):
+
+- Simple expected use cases
+
+- Edge cases (unexpected, or rare use cases)
+
+- Errors
+
+We will come back to these and provide specific examples in a few minutes.
+
+## When do we write tests? 
+
+Anytime you think about writing a function!
+
+## Workflow for writing functions and tests
+
+1. Write the function specifications and documentation - 
+but do not implement the function.
+
+2. Plan the test cases and document them.
+
+3. Create test data that is useful for assessing whether your function works as expected.
+
+4. Write the tests to evaluate your function based on the planned test cases and test data.
+
+5. Implement the function by writing the needed code in the function body to pass the tests.
+
+6. Iterate between steps 2-5 to improve the test coverage and function.
+
+## Example of workflow for writing functions and tests for data science
+
+Let's pretend we haven't yet written our `count_classes` function, 
+and follow the workflow I just outlined to develop our function 
+and it's test suite.
+
+### 1. Write the function specifications and documentation - but do not implement the function
+
+The first thing we should do is write the function specifications and documentation. This can effectively represented by an empty function and roxygen2-styled documentation in R as shown below:
+
+```{r}
+#| eval: false
+
+#' Count class observations
+#'
+#' Creates a new data frame with two columns, 
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col unquoted column name of column containing class labels
+#'
+#' @return A data frame with two columns. 
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#'
+#' @export
+#'
+#' @examples
+#' count_classes(mtcars, am)
+count_classes <- function(data_frame, class_col) {
+  # returns a data frame with two columns: class and count
+}
+```
+
+### 2. Plan the test cases and document them
+
+Next, we should plan out our test cases and start to document them. 
+
+At this point we can sketch out a skeleton for our test cases with code 
+but we are not yet ready to write them, 
+as we first will need to reproducibly create test data 
+that is useful for assessing whether your function works as expected. 
+
+### 2. Plan the test cases and document them (cont'd)
+
+So considering our function specifications, 
+some kinds of input we might anticipate our function may receive, 
+and correspondingly what it should return is listed in a table below:
+
+TBD...
+
+### 2. Plan the test cases and document them (cont'd)
+
+Next, I sketch out a skeleton for the unit tests. 
+For R, we will use the well maintained 
+and popular [`testthat`](https://testthat.r-lib.org/) R package 
+for writing our tests. 
+
+With `testthat` we create a `test_that` statement 
+for each related group of tests for a function. 
+For our example, we will create the four `test_that` statements shown below:
+
+```{r}
+#| eval: false
+
+test_that("`count_classes` should return a data frame or data frame extension", {
+  # tests to be added here
+})
+
+test_that("`count_classes` should return a data frame, or data frame extension, 
+with the number of rows that corresponds to the number of unique classes 
+in the column passed to `class_col`", {
+  # tests to be added here
+})
+
+test_that("`count_classes` should return a data frame, or data frame extension, 
+whose values in the `count` column correspond to the number of observations 
+for the group in the `class` column from the original data frame", {
+  # tests to be added here
+})
+
+test_that("`count_classes` should throw an error when incorrect types 
+are passed to `data_frame` and `class_col` arguments", {
+  # tests to be added here
+})
+```
+
+### 3. Create test data that is useful for assessing whether your function works as expected
+
+Now that we have a plan, we can create reproducible test data for that plan! When we do this, we want to keep our data as small and tractable as possible. We want to test things we know the answer to, or can at a minimum calculate by hand. We will use R code to reproducibly create the test data. We will need to do this for the data we will feed in as inputs to our function in the tests, as well as the data we expect our function to return.
+
+```{r}
+#| eval: false
+
+# function input for tests
+five_classes_3_obs <- data.frame(class_lables = rep(c("class1", "class2", "class3", "class4", "class5"), 3))
+two_classes_3_obs <- data.frame(class_lables = rep(c("class1", "class2"), 3))
+two_classes_3_and_2_obs <- data.frame(class_lables = c(rep(c("class1", "class2"), 2), "class1"))
+two_classes_3_and_1_obs <- data.frame(class_lables = c(rep("class1", 3), "class2"))
+one_class_3_obs <- data.frame(class_lables = rep("class1", 3))
+empty_df  <- data.frame(class_lables = character(0))
+vector_class_labels <- rep(c("class1", "class2"), 3)
+two_classes_3_obs_as_list <- list(class_lables = rep(c("class1", "class2"), 3))
+
+# expected function output
+five_classes_3_obs_output <- data.frame(class = c("class1", "class2", "class3", "class4", "class5"),
+                                        count = rep(3, 5))
+two_classes_3_obs_output <- data.frame(class = c("class1", "class2"),
+                                count = c(3, 3))
+two_classes_3_and_2_obs_output <- data.frame(class = c("class1", "class2"),
+                                      count = c(3, 2))
+two_classes_3_and_1_obs_output <- data.frame(class = c("class1", "class2"),
+                                      count = c(3, 1))
+one_class_3_obs_output <- data.frame(class = "class1",
+                              count = 3)
+empty_df_output <- data.frame(class = character(0),
+                              count = numeric(0))
+```
+
+### 4. Write the tests to evaluate your function based on the planned test cases and test data
+
+Now that we have the skeletons for our tests, and our reproducible test data, we can actually write the internals for our tests! We will do this by using expect_* functions from the testthat package. The table below shows some of the most commonly used expect_* functions. However, there are many more that can be found in the testthat expectations reference documentation.
+
+testthat test structure:
+
+```{r}
+#| eval: false
+
+test_that("Message to print if test fails", expect_*(...))
+```
+
+### 4. Write the tests to evaluate your function based on the planned test cases and test data (cont'd)
+
+#### Common expect_* statements for use with `test_that`:
+
+Is the object equal to a value?
+
+- `expect_identical` - test two objects for being exactly equal
+- `expect_equal` - compare R objects x and y testing ‘near equality’ (can set a tolerance)
+- `expect_equivalent` - compare R objects x and y testing ‘near equality’ (can set a tolerance) and does not assess attributes
+
+Does code produce an output/message/warning/error?
+
+- `expect_error` - tests if an expression throws an error
+- `expect_warning` - tests whether an expression outputs a warning
+- `expect_output` - tests that print output matches a specified value
+
+Is the object true/false?
+
+These are fall-back expectations that you can use when none of the other more specific expectations apply. The disadvantage is that you may get a less informative error message.
+
+- `expect_true` - tests if the object returns TRUE
+- `expect_false` - tests if the object returns FALSE
+
+4. 
+
+```{r}
+#| eval: false
+
+test_that("`count_classes` should return a tibble", {
+  expect_s3_class(count_classes(two_classes_3_obs, class_lables), "tibble")
+})
+
+test_that("`count_classes` should return a data frame, or data frame extension, 
+with the number of rows that corresponds to the number of unique classes 
+in the column passed to `class_col`", {
+  expect_equivalent(count_classes(five_classes_3_obs, class_lables), five_classes_3_obs_output)
+  expect_equivalent(count_classes(two_classes_3_obs, class_lables), two_classes_3_obs_output)
+  expect_equivalent(count_classes(one_class_3_obs, class_lables), one_class_3_obs_output)
+  expect_equivalent(count_classes(empty_df, class_lables), empty_df_output)
+})
+
+test_that("`count_classes` should return a data frame, or data frame extension, 
+whose values in the `count` column correspond to the number of observations 
+for the group in the `class` column from the original data frame", {
+  expect_equivalent(count_classes(two_classes_3_and_2_obs, class_lables), two_classes_3_and_2_obs_output)
+  expect_equivalent(count_classes(two_classes_3_and_1_obs, class_lables), two_classes_3_and_1_obs_output)
+})
+
+test_that("`count_classes` should throw an error when incorrect types 
+are passed to `data_frame` and `class_col` arguments", {
+  expect_error(count_classes(two_classes_3_obs, vector_class_labels))
+  expect_error(count_classes(two_classes_3_obs_as_list, class_lables))
+})
+```
+
+
+### Wait what??? Most of our tests fail…
+
+Yes, we expect that, we haven’t written our function body yet!
+
+### 5. Implement the function by writing the needed code in the function body to pass the tests
+
+FINALLY!! We can write the function body for our function! And then call our tests to see if they pass!
+
+```{r}
+#| eval: false
+
+#' Count class observations
+#'
+#' Creates a new data frame with two columns, 
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col unquoted column name of column containing class labels
+#'
+#' @return A data frame with two columns. 
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#'
+#' @export
+#'
+#' @examples
+#' count_classes(mtcars, am)
+count_classes <- function(data_frame, class_col) {
+    if (!is.data.frame(data_frame)) {
+        stop("`data_frame` should be a data frame or data frame extension (e.g. a tibble)")
+    }
+    
+    data_frame |>
+        dplyr::group_by({{ class_col }}) |>
+        dplyr::summarize(count = dplyr::n()) |>
+        dplyr::rename("class" = {{ class_col }})
+}
+```
+
+### 6. Iterate between steps 2-5 to improve the test coverage and function
+
+Are we done? For the purposes of this demo, yes! However in practice you would usually cycle through steps 2-5 two-three more times to further improve our tests and and function
+
+## Where do the function and test files go?
+
+In the workflow above, 
+we skipped over where we should put our tests 
+and how to call them in an automated way.
+
+Let's go to this version of the <span style="color: purple;">{eda}</span> package and explore how to do this:
+
+- TBD
+
+
+# Package documentation
+
+# Introduction to continuous integration using GitHub Actions
+
+# Publishing your R package
+
+## 
+
+![](img/package_distribution.png){width=600}
+
+*Source: <https://posit-conf-2023.github.io/pkg-dev/materials/slides.pdf>*
+
+## Level 1: Publishing on GitHub
+
+-   GitHub is where almost all R packages start out publishing, and continue publishing development versions between releases.
+
+-   For this to work, you need to push your package code to GitHub and provide users instructions like this to download, build and install your package:
+
+```         
+# install.packages("devtools")
+devtools::install_github("username/package")
+```
+
+## Level 2: Publishing on CRAN
+
+-   CRAN (founded in 1997) stands for the “Comprehensive R Archive Network”.
+-   CRAN is a collection of sites which host identical copies of:
+    -   R distribution(s)
+    -   the contributed extensions (i.e., packages)
+    -   documentation for R
+    -   binaries (i.e., packages)
+
+*Source: Hornik, K (2012). The Comprehensive R Archive Network. Wiley interdisciplinary reviews. Computational statistics. 4(4): 394-398. doi:10.1002/wics.1212*
+
+## What does it mean to be a CRAN package?
+
+::: incremental
+-   A stamp of authenticity: passed quality control of the check utility
+
+-   Ease of installation: can be installed by users via `install.packages()` and binaries are available for Windows & Mac OS’s.
+
+-   Discoverability: listed as a package on CRAN
+
+-   However, CRAN makes no assertions about the package’s usability, or the efficiency and correctness of the computations it performs
+:::
+
+## How to submit a package to CRAN
+
+::: incremental
+1.  Pick a version number.
+
+2.  Run and document `R CMD check`.
+
+3.  Check that you’re aligned with CRAN policies.
+
+4.  Update `README.md` and `NEWS.md`.
+
+5.  Submit the package to CRAN.
+
+6.  Prepare for the next version by updating version numbers.
+
+7.  Publicize the new version.
+:::
+
+*Source: [Chapter 22: Releasing to Cran](https://r-pkgs.org/release.html) - R packages book by Hadley Wickham & Jenny Bryan*
+
+## Notes on submitting to CRAN
+
+-   Your package must pass `R CMD check` with the current development version of R.
+
+-   It must work on at least two platforms (CRAN uses the following 4 platforms: Windows, Mac OS X, Linux and Solaris) - use GitHub Actions to ensure this before submitting to CRAN!
+
+> If you decide to submit a package to CRAN, follow the detailed instructions in [Chapter 22: Releasing to Cran](https://r-pkgs.org/release.html) from the R packages book by Hadley Wickham & Jenny Bryan.
+
+# Copyright & Licenses (who owns the code?)
+
+## Full disclosure... I AM NOT A LAWYER! {.center}
+
+## Learning Objectives
+
+::: incremental
+-   Explain who owns the copyright of code they write in a give situation
+-   Choose an appropriate license for software (and non-software) materials
+-   *Note: In this workshop, we will be focusing on Canadian copyright laws*
+:::
+
+## Copyright Law
+
+-   In both the US and Canada, software code falls under copyright law
+
+-   Copyright protects only the language and words used to express ideas, concepts and themes, not the ideas, concepts or themes themselves.
+
+------------------------------------------------------------------------
+
+-   Knowing who owns the copyright of software code is critical because the owner controls if and how the code may be:
+    -   copied
+    -   distributed
+    -   sold
+    -   modified
+    -   essentially, made profitable 💲💲
+
+## Canadian Copyright Law
+
+In Canada, the copyright owner is afforded the following rights:
+
+-   Economic rights:
+    -   the right to produce, reproduce, publish, translate, authorize & convert a work
+
+------------------------------------------------------------------------
+
+-   Moral rights:
+
+    -   the right to claim authorship, the right to remain anonymous, or the right to use a pseudonym or pen name
+    -   the right to integrity
+    -   the right of association
+
+> **Economic rights** can be transferred to entities that are not the author, whereas **moral rights** cannot (they can however, be waived).
+
+## Who has copyright ownership?
+
+This is a complicated question, and the answer starts with it depends on the case…
+
+![](img/lightbulb.jpg)
+
+## Case I: You author the code for yourself
+
+-   You author the code and you are doing this for **yourself** (i.e., not for your employer, not for a client, etc).
+
+-   In such a case, you (the person who typed the code) automatically become the copyright owner.
+
+## 
+
+-   In both Canada and the USA, you do not need to need to affix the copyright symbol © to your work (some other countries do require this however).
+
+-   Although the copyright symbol © is not required, it is often used in copyrighted works to clearly identify that the code is protected by copyright.
+
+> In both Canada and the US, it is possible (and advisable) to register your copyright as evidence that a copyright exists and who the owner is.
+
+## Case II: You write the code in the course of employment
+
+-   In Canada, if you write code for work as an employee the copyright ownership is typically assigned to **the employer**.
+
+## 
+:::incremental 
+In the Canada, software code is defined as “work made in the course of employment” if:
+
+- The author of the code was in the employment of some other entity under a contract **of** service or apprenticeship and the code was written in the course of their employment by that entity. 
+
+- And there exists no agreement (written, or otherwise, and even potentially even presumed) that the employee retains ownership of copyright for the code written during the term of their employment.
+:::
+------------------------------------------------------------------------
+
+-   Work made in the course of employment is different than a contract **for** services (in which the author of the code acts more like an independent consultant, and in such a case it does not appear that “work made in the course of employment” would apply).
+
+-   In this case, the default position is usually that the **contractor retains copyright ownership** of the work they create, unless the contract specifically assigns copyright to the client.
+
+## Implications when you forgo copyright ownership
+
+::: incremental
+-   Q: What if you forgo copyright ownership and want to use any of the code that you wrote again?
+
+-   A: You would need to negotiate a licence to use the code you wrote, the same way any other third-party would… 😓
+:::
+## 
+
+::: incremental
+To avoid this issue, you could:
+
+-   Negotiate which code is core to the work (“work-made-for-hire”) and what (pre-built) code (e.g., packages, scripts) are outside the core work and should not (*at the beginning of the project!*).
+
+-   Negotiate that the client purchase a license to the code you write (as opposed to hiring you to write the code).
+:::
+
+## Licenses
+
+-   If you publicly share your creative work (i.e., software code), you should let others know if and how they can reuse it!
+
+-   This is done via the inclusion of a `LICENSE` or `LICENSE.txt` file in the base directory of the repository that clearly states under which license the content is being made available.
+
+## Licenses (cont'd)
+
+-   Unless you include a license that specifies otherwise, nobody else can copy, distribute, or modify your work without being at risk of take-downs, shake-downs, or litigation.
+
+-   Once the work has other contributors (each a copyright holder), “nobody” starts including you!
+
+-   A license solves this problem by granting rights to others (the licensees) that they would otherwise not have.
+
+## Choosing a License
+::: incremental
+Important considerations when choosing a license include:
+
+-   Whether you require people distributing derivative works to also require others to distribute their derivative works in the same way.
+
+-   Whether the content you are licensing is source code, and if it is, whether you want to require that derivatives of your work share the source code
+:::
+
+## Choosing a License (cont'd)
+
+-   In practice, a few licenses are by far the most popular.
+
+-   [choosealicense.com](choosealicense.com) will help you find a common license that suits your needs.
+
+> 💡Tip: Choose a license that is in common use! This makes life easier for contributors and users, because they are more likely to already be familiar with the license and don’t have to wade through a bunch of jargon to decide if they’re ok with it.
+
+## Creative Commons
+
+-   But not all my creative Data Science work is code (e.g. visualizations, reports, presentations), so how do I license it?
+
+-   The **Creative Commons** licences were created for such works and they are now widely used in academia and the publishing industry.
+
+> <https://chooser-beta.creativecommons.org/>
+
+## Creative Commons (cont'd)
+
+![](img/CC1.jpg)
+
+*Source: “How to License Poster” by Creative Commons is licensed under CC BY 4.0*
+
+## Creative Commons (cont'd)
+
+![](img/CC2.jpg)
+
+*Source: “How to License Poster” by Creative Commons is licensed under CC BY 4.0*
+
+
+## Scenario 1 
+
+Imagine you're a data scientist and you developed a tool that analyzes satellite imagery to track deforestation patterns. Your primary goal is to make this tool freely available to researchers and other conservationists to help monitor and combat deforestation, but you still want to retain the copyright to your tool. 
+
+## Scenario 2 
+
+Imagine you're a data scientist and you have compiled a data set of climate change projections from various scientific sources. In order to promote further analyses aimed at understanding and mitigating the effects of climate change, you want to share this data set with the research community. 
+
+
+## References
+
+-   [Who Owns The Code?](https://asp-software.org/www/misv_resources/business-articles/who-owns-the-code/)
+
+-   [Canadian Copyright Law - University of Alberta](https://www.ualberta.ca/faculty-and-staff/copyright/intro-to-copyright-law/canadian-copyright-law.html)
+
+-   [Do you actually own the IP generated by your Canadian employees?](https://www.smartbiggar.ca/insights/publication/do-you-actually-own-the-ip-generated-by-your-canadian-employees-)
+
+-   [Ownership of Copyright - Canadian Copyright Act](https://laws-lois.justice.gc.ca/eng/acts/C-42/page-4.html#h-102834)
+
+-   [The Unreasonable Fear of Infection](https://www.rosenlaw.com/html/GPL.pdf)
+
+-   [Frequently Asked Questions about the GNU Licenses](https://www.gnu.org/licenses/gpl-faq.en.html)

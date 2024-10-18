@@ -1,0 +1,107 @@
+---
+title: "Publishing your R package"
+format: 
+  revealjs:
+    slide-number: true
+    slide-level: 4
+    embed-resources: true
+---
+
+## 
+
+Congratulations, your package is ready to be published! 🎉
+
+Take a moment to reflect on where you might want to publish your package (GitHub vs. CRAN). Think about which would be easier as the...
+
+- User
+- Maintainer
+
+## 
+
+![](img/package_distribution.png){fig-align="center" width=600}
+
+*Source: <https://posit-conf-2023.github.io/pkg-dev/materials/slides.pdf>*
+
+## Level 1: Publishing on GitHub
+
+-   GitHub is where almost all R packages start out publishing, and continue publishing development versions between releases.
+
+-   For this to work, you need to push your package code to GitHub and provide users instructions like this to download, build and install your package:
+
+```         
+devtools::install_github("katieburak/eda")
+```
+
+## Level 2: Publishing on CRAN
+
+-   CRAN (founded in 1997) stands for the “Comprehensive R Archive Network”.
+-   CRAN is a collection of sites which host identical copies of:
+    -   R distribution(s)
+    -   the contributed extensions (i.e., packages)
+    -   documentation for R
+    -   binaries (i.e., packages)
+    
+::: {style="font-size: 50%;"}
+*Source: Hornik, K (2012). The Comprehensive R Archive Network. Wiley interdisciplinary reviews. Computational statistics. 4(4): 394-398. doi:10.1002/wics.1212*
+:::
+
+## What does it mean to be a CRAN package?
+
+::: incremental
+-   A stamp of authenticity: passed quality control of the check utility
+
+-   Ease of installation: can be installed by users via `install.packages()` and binaries are available for Windows & Mac OS’s.
+
+-   Discoverability: listed as a package on CRAN
+
+-   However, CRAN makes no assertions about the package’s usability, or the efficiency and correctness of the computations it performs
+:::
+
+## How to submit a package to CRAN
+
+::: incremental
+1.  Pick a version number.
+
+2.  Run and document `R CMD check`.
+
+3.  Check that you’re aligned with [CRAN policies](https://cran.r-project.org/web/packages/policies.html).
+
+4.  Update `README.md` and `NEWS.md`.
+
+5.  Submit the package to CRAN.
+
+6.  Prepare for the next version by updating version numbers.
+
+7.  Publicize the new version.
+:::
+
+::: {style="font-size: 50%;"}
+*Source: [Chapter 22: Releasing to Cran](https://r-pkgs.org/release.html) - R packages book by Hadley Wickham & Jenny Bryan*
+:::
+
+## Common problems (from the R packages book):
+
+- The maintainer’s e-mail address must be stable (if they can’t get in touch with you they will remove your package from CRAN).
+
+- You must have clearly identified the copyright holders in DESCRIPTION.
+
+- Do not make external changes without explicit user permission. 
+
+- Do not submit updates too frequently. The policy suggests a new version once every 1-2 months at most.
+
+
+
+
+## Notes on submitting to CRAN
+
+-   Your package must pass `R CMD check` with the current development version of R.
+
+-   It must work on at least two platforms (CRAN uses the following 4 platforms: Windows, Mac OS X, Linux and Solaris) - use GitHub Actions to ensure this before submitting to CRAN!
+
+> If you decide to submit a package to CRAN, follow the detailed instructions in [Chapter 22: Releasing to Cran](https://r-pkgs.org/release.html) from the R packages book by Hadley Wickham & Jenny Bryan.
+
+## Attribution
+
+This content has been developed based on [**R Packages (2e) by Hadley Wickham and Jennifer Bryan**](https://r-pkgs.org/) and the UBC course notes for [**Reproducible and Trustworthy Workflows for Data Science**](https://ubc-dsci.github.io/reproducible-and-trustworthy-workflows-for-data-science/materials/lectures/10-packaging-and-documenting.html#when-to-start-writing-an-r-or-python-package) by Tiffany Timbers, Joel Östblom, Florencia D’Andrea, and Rodolfo Lourenzutti.
+
+

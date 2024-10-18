@@ -1,0 +1,193 @@
+---
+title: "Copyright & Licenses (who owns the code?)"
+format: 
+  revealjs:
+    slide-number: true
+    slide-level: 4
+    embed-resources: true
+---
+
+## Full disclosure... I AM NOT A LAWYER! {.center}
+
+## Learning Objectives
+
+::: incremental
+-   Explain who owns the copyright of code they write in a given situation
+-   Choose an appropriate license for software (and non-software) materials
+
+>  **Note:** In this workshop, we will be focusing on Canadian copyright laws
+:::
+
+## Copyright Law
+
+-   In both the US and Canada, software code falls under copyright law
+
+-   Copyright protects only the language and words used to express ideas, concepts and themes, not the ideas, concepts or themes themselves.
+
+##
+
+-   Knowing who owns the copyright of software code is critical because the owner controls if and how the code may be:
+    -   copied
+    -   distributed
+    -   sold
+    -   modified
+    -   essentially, made profitable 💲💲
+
+## Canadian Copyright Law
+
+In Canada, the copyright owner is afforded the following rights:
+
+-   Economic rights:
+    -   the right to produce, reproduce, publish, translate, authorize & convert a work
+
+##
+
+-   Moral rights:
+
+    -   the right to claim authorship, the right to remain anonymous, or the right to use a pseudonym or pen name
+    -   the right to integrity
+    -   the right of association
+
+> **Economic rights** can be transferred to entities that are not the author, whereas **moral rights** cannot (they can however, be waived).
+
+## Who has copyright ownership?
+
+This is a complicated question, and the answer starts with it depends on the case…
+
+![](img/lightbulb.jpg){fig-align="center"}
+
+## Case I: You author the code for yourself
+
+-   You author the code and you are doing this for **yourself** (i.e., not for your employer, not for a client, etc).
+
+-   In such a case, you (the person who typed the code) automatically become the copyright owner.
+
+## 
+
+-   In both Canada and the USA, you do not need to need to affix the copyright symbol © to your work (some other countries do require this however).
+
+-   Although the copyright symbol © is not required, it is often used in copyrighted works to clearly identify that the code is protected by copyright.
+
+> It is possible (and advisable) to [register your copyright](https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en/copyright/registration-copyright-filing-online) as evidence that a copyright exists and who the owner is.
+
+## Case II: You write the code in the course of employment
+
+-   In Canada, if you write code for work as an employee the copyright ownership is typically assigned to **the employer**.
+
+## 
+:::incremental 
+In the Canada, software code is defined as “work made in the course of employment” if:
+
+- The author of the code was in the employment of some other entity under a contract **of** service or apprenticeship and the code was written in the course of their employment by that entity. 
+
+- And there exists no agreement (written, or otherwise, and even potentially even presumed) that the employee retains ownership of copyright for the code written during the term of their employment.
+:::
+
+## 
+
+-   Work made in the course of employment is different than a contract **for** services (e.g., independent consultant where “work made in the course of employment” would not apply).
+
+-   In this case, the default position is usually that the **contractor retains copyright ownership** of the work they create, unless the contract specifically assigns copyright to the client.
+
+## Implications when you forgo copyright ownership
+
+::: incremental
+-   **Q:** What if you forgo copyright ownership and want to use any of the code that you wrote again?
+
+-   **A:** You would need to negotiate a license to use the code you wrote, the same way any other third-party would… 😓
+:::
+## 
+
+::: incremental
+To avoid this issue, you could:
+
+-   Negotiate which code is core to the work (“work-made-for-hire”) and what (pre-built) code (e.g., packages, scripts) are outside the core work (*at the beginning of the project!*).
+
+-   Negotiate that the client purchase a license to the code you write (as opposed to hiring you to write the code).
+:::
+
+## Licenses
+
+-   If you publicly share your creative work (i.e., software code), you should let others know if and how they can reuse it!
+
+-   This is done via the inclusion of a `LICENSE` or `LICENSE.md` file in the base directory of the repository that clearly states under which license the content is being made available.
+
+## {.center}
+
+![](img/license.png)
+
+## Licenses (cont'd)
+
+-   Unless you include a license that specifies otherwise, nobody else can copy, distribute, or modify your work without being at risk of take-downs, shake-downs, or litigation.
+
+-   Once the work has other contributors (each a copyright holder), “nobody” starts including you!
+
+-   A license solves this problem by granting rights to others (the licensees) that they would otherwise not have.
+
+## Choosing a License
+::: incremental
+Important considerations when choosing a license include:
+
+-   Whether you require people distributing derivative works to also require others to distribute their derivative works in the same way.
+
+-   Whether the content you are licensing is source code, and if it is, whether you want to require that derivatives of your work share the source code
+:::
+
+## Choosing a License (cont'd)
+
+-   In practice, a few licenses are by far the most popular.
+
+-   [choosealicense.com](choosealicense.com) will help you find a common license that suits your needs.
+
+> 💡Tip: Choose a license that is in common use! This makes life easier for contributors and users, because they are more likely to already be familiar with the license and don’t have to wade through a bunch of jargon to decide if they’re ok with it.
+
+## Creative Commons
+
+-   But not all my creative Data Science work is code (e.g. visualizations, reports, presentations), so how do I license it?
+
+-   The **Creative Commons** licences were created for such works and they are now widely used in academia and the publishing industry.
+
+> <https://chooser-beta.creativecommons.org/>
+
+## Creative Commons (cont'd)
+
+![](img/CC1.jpg)
+
+*Source: “How to License Poster” by Creative Commons is licensed under CC BY 4.0*
+
+## Creative Commons (cont'd)
+
+![](img/CC2.jpg)
+
+*Source: “How to License Poster” by Creative Commons is licensed under CC BY 4.0*
+
+
+## Scenario 1 
+
+Imagine you're a data scientist and you developed a tool that analyzes satellite imagery to track deforestation patterns. Your goal is to make this tool freely available to researchers to help monitor and combat deforestation, but you still want to get credit for your work. 
+
+![](img/trees.jpg){fig-align="center"}
+
+## Scenario 2 
+
+Imagine you're a data scientist and you have compiled a data set of climate change projections from various scientific sources. In order to promote further analyses aimed at understanding and mitigating the effects of climate change, you want to share this data set with the research community. 
+
+![](img/climate.jpg){fig-align="center"}
+
+## Attribution 
+
+This content has been developed based on the UBC course notes for  [**DSCI 524: Collaborative Software Development**](https://ubc-mds.github.io/DSCI_524_collab-sw-dev/README.html) by Tiffany Timbers, [**Software Carpentry Version Control with Git Licensing Lesson**](https://swcarpentry.github.io/git-novice/11-licensing.html) and [https://choosealicense.com/](https://choosealicense.com/).
+
+## References
+
+-   [Who Owns The Code?](https://asp-software.org/www/misv_resources/business-articles/who-owns-the-code/)
+
+-   [Canadian Copyright Law - University of Alberta](https://www.ualberta.ca/faculty-and-staff/copyright/intro-to-copyright-law/canadian-copyright-law.html)
+
+-   [Do you actually own the IP generated by your Canadian employees?](https://www.smartbiggar.ca/insights/publication/do-you-actually-own-the-ip-generated-by-your-canadian-employees-)
+
+-   [Ownership of Copyright - Canadian Copyright Act](https://laws-lois.justice.gc.ca/eng/acts/C-42/page-4.html#h-102834)
+
+-   [The Unreasonable Fear of Infection](https://www.rosenlaw.com/html/GPL.pdf)
+
+-   [Frequently Asked Questions about the GNU Licenses](https://www.gnu.org/licenses/gpl-faq.en.html)

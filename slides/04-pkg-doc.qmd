@@ -1,0 +1,233 @@
+---
+title: "Package Documentation"
+format:
+  revealjs:
+    slide-number: true
+    slide-level: 4
+    embed-resources: true
+
+editor:
+  render-on-save: true
+---
+
+
+## What is documentation?
+
+- package: detailed information about the components, functions, usage, and dependencies
+- function: purpose, parameters, return values, usage, examples
+
+```r
+library(tidyverse)
+
+?select
+```
+
+- In RStudio, you can also use the F1 key.
+
+## Your Turn
+
+In groups: take 3 minutes
+
+- Open a documentation page for any function (you can use `dplyr::select`)
+- What do you like about it?
+- What do you not understand about it?
+
+## Our current function {.smaller}
+
+```r
+#' Count class observations
+#'
+#' Creates a new data frame with two columns,
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col unquoted column name of column containing class labels
+#'
+#' @return A data frame with two columns.
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations
+#'   for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#'
+#' @export
+#'
+#' @examples
+#' count_classes(mtcars, am)
+count_classes <- function(data_frame, class_col) {
+  if (!is.data.frame(data_frame)) {
+    stop("`data_frame` should be a data frame or data frame extension (e.g. a tibble)")
+  }
+
+  data_frame |>
+    dplyr::group_by({{ class_col }}) |>
+    dplyr::summarize(count = dplyr::n()) |>
+    dplyr::rename("class" = {{ class_col }})
+}
+}
+```
+
+## The Roxygen2 comment {.smaller}
+
+```{r}
+#| echo: true
+#| code-line-numbers: "|1|3-5|7-8|10-13|16|18-19|"
+
+#' Count class observations
+#'
+#' Creates a new data frame with two columns,
+#' listing the classes present in the input data frame,
+#' and the number of observations for each class.
+#'
+#' @param data_frame A data frame or data frame extension (e.g. a tibble).
+#' @param class_col unquoted column name of column containing class labels
+#'
+#' @return A data frame with two columns.
+#'   The first column (named class) lists the classes from the input data frame.
+#'   The second column (named count) lists the number of observations
+#'   for each class from the input data frame.
+#'   It will have one row for each class present in input data frame.
+#'
+#' @export
+#'
+#' @examples
+#' count_classes(mtcars, am)
+```
+
+## `@export` is important
+
+- It puts the exported function into the `NAMESPACE` file when you build the package.
+
+```r
+library(eda)
+count_classes(mtcars, am)
+```
+
+is equlivilant to
+
+```r
+eda::count_classes(mtcars, am)
+```
+
+## Without `@export`
+
+```r
+# will not work
+library(eda)
+count_classes(mtcars, am)
+```
+You will have to use `:::` (instead of `::`)
+
+```r
+eda:::count_classes(mtcars, am)
+```
+
+:::{.callout-note}
+You will rarely have to directly call unexported functions.
+They are mainly used in debugging or if you are writing your own custom functions
+extending a package.
+:::
+
+## Vignette
+
+- An article or walkthrough of a set of features of your package or function
+- A more detailed example than just the technical information
+- Showcase a case study
+
+```r
+> usethis::use_vignette("my-vignette")
+
+✔ Setting active project to '/home/dan/git/ubc/eda'
+✔ Adding 'knitr' to Suggests field in DESCRIPTION
+✔ Adding 'rmarkdown' to Suggests field in DESCRIPTION
+✔ Adding 'knitr' to VignetteBuilder
+✔ Adding 'inst/doc' to '.gitignore'
+✔ Creating 'vignettes/'
+✔ Adding '*.html', '*.R' to 'vignettes/.gitignore'
+✔ Writing 'vignettes/my-vignette.Rmd'
+• Modify 'vignettes/my-vignette.Rmd'
+```
+
+## Build your package and docs!
+
+```r
+devtools::check() # does everything
+devtools::document() # just the documentation
+```
+
+## `{pkgdown}`
+
+- Takes all the exising roxygen2 documentation we have already written to create a website
+- Provides another asset for our package to make it easier for people to learn how to use it
+
+<https://pkgdown.r-lib.org/>
+
+## `usethis::use_pkgdown()`
+
+```{r}
+#| eval: false
+#| error: true
+#| echo: true
+#| code-line-numbers: "|5"
+
+> usethis::use_pkgdown()
+
+✔ Setting active project to '/Users/danielchen/git/eda'
+✔ Adding '^_pkgdown\\.yml$', '^docs$', '^pkgdown$' to '.Rbuildignore'
+✔ Adding 'docs' to '.gitignore'
+✔ Writing '_pkgdown.yml'
+• Modify '_pkgdown.yml'
+```
+
+## `pkgdown::build_site()` {.smaller}
+
+```r
+> pkgdown::build_site()
+── Installing package eda into temporary library ─────────────────────────────────────────────────────────────────────────
+── Building pkgdown site for package foofactors ────────────────────────────────
+Reading from: /Users/danielchen/git/eda
+Writing to: /Users/danielchen/git/eda/docs
+── Initialising site ───────────────────────────────────────────────────────────
+Copying ../../../Library/R/arm64/4.3/library/pkgdown/BS5/assets/link.svg and
+../../../Library/R/arm64/4.3/library/pkgdown/BS5/assets/pkgdown.js
+to link.svg and pkgdown.js
+── Building home ───────────────────────────────────────────────────────────────
+Writing `authors.html`
+Reading LICENSE.md
+Writing `LICENSE.html`
+Writing `LICENSE-text.html`
+Writing `404.html`
+── Building function reference ─────────────────────────────────────────────────
+Writing `reference/index.html`
+Reading man/count_classes.Rd
+Writing `reference/count_classes.html`
+Writing sitemap.xml
+── Building search index ───────────────────────────────────────────────────────
+── Finished building pkgdown site for package eda ───────────────────────
+── Finished building pkgdown site for package eda ────────────────────────────────────────────────────────────────────────
+ℹ Previewing site
+```
+
+## `{pkgdown}` components
+
+- `docs/` directory containing a website
+- `README.md` becomes the homepage
+- `man/` documentation generates a function reference
+- `articles/` vignettes will be rendered
+
+## Push your docs to github
+
+- Edit your `.gitignore` and remove the `docs/` entry
+- `git add`, `git commit`, and `git push` your `docs` directory to the repository
+
+## GitHub Pages
+
+- Can publish and run any **static** website (i.e., no database or server)
+- Looks for website information in 1 of 3 locations:
+  - *In the `docs/` directory of the `main` branch
+  - In the root of the `main` branch
+  - In the root of the `gh-pages` branch
+
+## Enable your ghpages pkgdown site
+
+![](img/ghpages-setup.png){width=600}
