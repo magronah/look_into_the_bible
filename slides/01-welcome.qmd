@@ -1,0 +1,113 @@
+---
+title: "Why We Hold the Bible in High Esteem"
+format: 
+  revealjs:
+    slide-number: true
+    slide-level: 4
+    embed-resources: true
+---
+
+# Welcome!
+
+- You're welcome to oure *Department of Bible Studies*
+
+::: {.fragment .fade-left}
+::: {#fig-team layout-ncol="4"}
+![Michael and Mary Agronah, Assistant Professors of Teaching](img/mm-agronah.jpeg){width=170} 
+
+Teaching Team
+:::
+:::
+
+# What is an `R` package and when should I make one?
+
+![](img/panda.png){fig-align="center" width=10%}
+
+## This question is key!
+
+::: incremental
+- An `R` package is a <span style="color: purple;">collection</span> of functions, tests, data, compiled code, and standardized documentation
+- The reason to create a package is mostly about <span style="color: purple;">creating code that should be easier to reuse and share</span>
+:::
+
+![](img/software.png){fig-align="center" width=5%}
+
+## More specifically...
+
+- `R` packages are created:
+  - When your <span style="color: purple;">DRY</span> ("Do Not Repeat Yourself) radar goes off
+  - When you think your code has general usefulness others could benefit from (this could include future you)
+  - When you want to <span style="color: purple;">share</span> data (`R` packages in particular are used quite heavily for this)
+
+. . .
+
+> **Source:** Lecture notes from [UBC's **DSCI 310** course (Reproducible and Trustworthy Workflows for Data Science)](https://ubc-dsci.github.io/reproducible-and-trustworthy-workflows-for-data-science/materials/lectures/10-packaging-and-documenting.html#when-to-start-writing-an-r-or-python-package)
+
+## Let's start with a motivating example
+
+::: incremental
+- Suppose that, <span style="color: purple;">in many of your analyses</span>, you find yourself repeatedly coding the distribution of observations over the classes (i.e., categories) of a given variable in your dataset
+- You find yourself <span style="color: purple;">rewriting code, copying and pasting code and/or copying and pasting files containing the code to do this</span>
+:::
+
+## Moreover...
+
+::: incremental
+- In doing so, you sometimes (or often!) make trivial mistakes
+- You wonder whether others doing <span style="color: purple;">similar analyses</span> face this problem as well, and want to share your (eventual) solution with others
+:::
+
+## Counting observations across classes code example
+
+- The code below is counting how many cars in `mtcars` (composed of 32 observations) have `4`, `6`, and `8` cylinders
+
+. . .
+
+```{r}
+#| echo: true
+#| code-line-numbers: "|3|4|5|6"
+library(tidyverse, quietly = TRUE)
+
+mtcars |>
+  group_by(cyl) |>
+  summarize(count = n()) |>
+  rename("class" = cyl)
+```
+
+## Is an `R` package the answer to our pains with how we have been previously trying to reuse our code?
+
+. . .
+
+<br>
+
+**Yes, it is!**
+
+## Packaging our code
+
+::: incremental
+- Allows us to more easily reuse it in many different projects, in a less error-prone way
+- Lets others benefit from the code we have written
+- Increases our code quality because when packaging we:
+     - must <span style="color: purple;">modularize</span> our code into functions and write function reference documentation
+     - have our code <span style="color: purple;">organized</span> in a way that works well with tools for creating tutorials/vignettes, as well as formal <span style="color: purple;">code/software testing</span>
+:::
+
+## How are `R` packages shared and downloaded?
+
+- `R` packages can be shared and downloaded using code repositories, like GitHub 
+- We also have the [**Comprehensive R Archive Network (CRAN)**](https://cran.r-project.org) with over <span style="color: purple;">20,000 packages available</span>
+
+. . .
+
+> *CRAN is a network of ftp and web servers around the world that store identical, up-to-date, versions of code and documentation for `R`.*
+
+## What will be the workshop topics?
+::: incremental
+- Development of `R` packages via a <span style="color: purple;">toy example</span>
+- Introduction to <span style="color: purple;">package testing</span>
+- Setting up <span style="color: purple;">documentation</span>
+- Introduction to <span style="color: purple;">continuous integration</span> via <span style="color: purple;">GitHub Actions</span>
+- Sharing and publishing packages on <span style="color: purple;">GitHub</span> and <span style="color: purple;">CRAN</span> 
+- Definition of <span style="color: purple;">copyright rules</span>
+- Choosing the most appropriate <span style="color: purple;">license</span>
+:::

@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "slides/01-welcome.html#this-question-is-key",
+    "href": "slides/01-welcome.html#this-question-is-key",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "This question is key!",
+    "text": "This question is key!\n\n\nAn R package is a collection of functions, tests, data, compiled code, and standardized documentation\nThe reason to create a package is mostly about creating code that should be easier to reuse and share"
+  },
+  {
+    "objectID": "slides/01-welcome.html#more-specifically",
+    "href": "slides/01-welcome.html#more-specifically",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "More specifically…",
+    "text": "More specifically…\n\nR packages are created:\n\nWhen your DRY (“Do Not Repeat Yourself) radar goes off\nWhen you think your code has general usefulness others could benefit from (this could include future you)\nWhen you want to share data (R packages in particular are used quite heavily for this)\n\n\n\n\nSource: Lecture notes from UBC’s DSCI 310 course (Reproducible and Trustworthy Workflows for Data Science)"
+  },
+  {
+    "objectID": "slides/01-welcome.html#lets-start-with-a-motivating-example",
+    "href": "slides/01-welcome.html#lets-start-with-a-motivating-example",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "Let’s start with a motivating example",
+    "text": "Let’s start with a motivating example\n\n\nSuppose that, in many of your analyses, you find yourself repeatedly coding the distribution of observations over the classes (i.e., categories) of a given variable in your dataset\nYou find yourself rewriting code, copying and pasting code and/or copying and pasting files containing the code to do this"
+  },
+  {
+    "objectID": "slides/01-welcome.html#moreover",
+    "href": "slides/01-welcome.html#moreover",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "Moreover…",
+    "text": "Moreover…\n\n\nIn doing so, you sometimes (or often!) make trivial mistakes\nYou wonder whether others doing similar analyses face this problem as well, and want to share your (eventual) solution with others"
+  },
+  {
+    "objectID": "slides/01-welcome.html#counting-observations-across-classes-code-example",
+    "href": "slides/01-welcome.html#counting-observations-across-classes-code-example",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "Counting observations across classes code example",
+    "text": "Counting observations across classes code example\n\nThe code below is counting how many cars in mtcars (composed of 32 observations) have 4, 6, and 8 cylinders\n\n\n\nlibrary(tidyverse, quietly = TRUE)\n\nmtcars |&gt;\n  group_by(cyl) |&gt;\n  summarize(count = n()) |&gt;\n  rename(\"class\" = cyl)\n\n# A tibble: 3 × 2\n  class count\n  &lt;dbl&gt; &lt;int&gt;\n1     4    11\n2     6     7\n3     8    14"
+  },
+  {
+    "objectID": "slides/01-welcome.html#is-an-r-package-the-answer-to-our-pains-with-how-we-have-been-previously-trying-to-reuse-our-code",
+    "href": "slides/01-welcome.html#is-an-r-package-the-answer-to-our-pains-with-how-we-have-been-previously-trying-to-reuse-our-code",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "Is an R package the answer to our pains with how we have been previously trying to reuse our code?",
+    "text": "Is an R package the answer to our pains with how we have been previously trying to reuse our code?\n\n\nYes, it is!"
+  },
+  {
+    "objectID": "slides/01-welcome.html#packaging-our-code",
+    "href": "slides/01-welcome.html#packaging-our-code",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "Packaging our code",
+    "text": "Packaging our code\n\n\nAllows us to more easily reuse it in many different projects, in a less error-prone way\nLets others benefit from the code we have written\nIncreases our code quality because when packaging we:\n\nmust modularize our code into functions and write function reference documentation\nhave our code organized in a way that works well with tools for creating tutorials/vignettes, as well as formal code/software testing"
+  },
+  {
+    "objectID": "slides/01-welcome.html#how-are-r-packages-shared-and-downloaded",
+    "href": "slides/01-welcome.html#how-are-r-packages-shared-and-downloaded",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "How are R packages shared and downloaded?",
+    "text": "How are R packages shared and downloaded?\n\nR packages can be shared and downloaded using code repositories, like GitHub\nWe also have the Comprehensive R Archive Network (CRAN) with over 20,000 packages available\n\n\n\nCRAN is a network of ftp and web servers around the world that store identical, up-to-date, versions of code and documentation for R."
+  },
+  {
+    "objectID": "slides/01-welcome.html#what-will-be-the-workshop-topics",
+    "href": "slides/01-welcome.html#what-will-be-the-workshop-topics",
+    "title": "Why We Hold the Bible in High Esteem",
+    "section": "What will be the workshop topics?",
+    "text": "What will be the workshop topics?\n\n\nDevelopment of R packages via a toy example\nIntroduction to package testing\nSetting up documentation\nIntroduction to continuous integration via GitHub Actions\nSharing and publishing packages on GitHub and CRAN\nDefinition of copyright rules\nChoosing the most appropriate license"
+  }
+]

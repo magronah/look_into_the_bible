@@ -2,7 +2,7 @@
 
 This is a compilations of my bible studies on topics that the Holy Spirit lays on my heart. Here are the topics I have written on so far
 
-## Sin
+## 1. Sin
 
 ### give a summary
 In this workshop learners will be introduced to what an R package is and when they should invest the time to make one. By the end of the workshop, learners should be able to build their own package that can be easily shared and installed by others. Additional important topics such as code testing, documentation and licenses will also be attended to. The workshop outline is shown below below:
